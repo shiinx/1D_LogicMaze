@@ -1,0 +1,33 @@
+module play (
+    input clk,  // clock
+    input rst,  // reset
+    input a,
+    input b,
+    input c,
+    input d,
+    input alufn1[6],
+    input alufn2[6],
+    input alufn3[6],
+    output out
+  ) {
+  alu aluMOD1;
+  sig out1;
+  sig out2;
+  alu aluMOD2;
+  alu aluMOD3;
+
+  always {
+      aluMOD1.alufn = alufn1;
+      aluMOD1.a = a;
+      aluMOD1.b = b;
+      out1 = aluMOD1.alu[0];
+      aluMOD2.alufn = alufn2;
+      aluMOD2.a = c;
+      aluMOD2.b = d;
+      out2 = aluMOD2.alu[0];
+      aluMOD3.alufn = alufn3;
+      aluMOD3.a = out1;
+      aluMOD3.b = out2;
+      out = aluMOD3.alu[0];
+  }
+}

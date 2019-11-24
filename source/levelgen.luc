@@ -1,0 +1,24 @@
+module levelgen (
+    input clk,
+    input rst,
+    output alufn1[6],
+    output alufn2[6],
+    output alufn3[6],
+    output inv1,
+    output inv2,
+    output inv3
+  ) {
+
+  randomGate rg1(.clk(clk),.rst(rst));
+  randomGate rg2(.clk(clk),.rst(rst));
+  randomGate rg3(.clk(clk),.rst(rst));
+  
+  always {
+    alufn1 = rg1.alufn;
+    inv1 = rg1.inv;
+    alufn2 = rg2.alufn;
+    inv2 = rg2.inv;
+    alufn3 = rg3.alufn;
+    inv3 = rg3.inv;  
+  }
+}
