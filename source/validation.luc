@@ -1,0 +1,43 @@
+module validation (
+    input alufn1[6],
+    input alufn2[6],
+    input alufn3[6],
+    input inv1,
+    input inv2,
+    input inv3,
+    output out[16]
+  ) {
+  
+  alu alu1;
+  alu alu2;
+  alu alu3;
+  
+  always {
+    alu1.a = 0;
+    alu1.b = 0;
+    alu2.a = 0;
+    alu2.b = 0;
+    
+    alu1.alufn = alufn1;
+    alu2.alufn = alufn2;
+    alu3.alufn = alufn3;
+    
+    if(inv1 == 1){
+      alu3.a = ~alu1.alu;
+    }else{
+      alu3.a = alu1.alu;
+    }
+    
+    if(inv2 == 1){
+      alu3.b = ~alu2.alu;
+    }else{
+      alu3.b = alu2.alu;
+    }
+    
+    if(inv3 == 1){
+      out = ~alu3.alu;
+    }else{
+      out = alu3.alu;
+    }
+  }
+}

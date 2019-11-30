@@ -12,6 +12,7 @@ module levelgen (
   randomGate rg1(.clk(clk),.rst(rst));
   randomGate rg2(.clk(clk),.rst(rst));
   randomGate rg3(.clk(clk),.rst(rst));
+
   
   always {
     alufn1 = rg1.alufn;
@@ -19,6 +20,6 @@ module levelgen (
     alufn2 = rg2.alufn;
     inv2 = rg2.inv;
     alufn3 = rg3.alufn;
-    inv3 = rg3.inv;  
+    inv3 = rg3.inv;
   }
 }

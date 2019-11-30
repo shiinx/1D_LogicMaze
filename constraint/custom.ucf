@@ -1,0 +1,12 @@
+NET "io_sel<4>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<5>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<6>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<7>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<8>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<9>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<10>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<11>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<12>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<13>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<14>" LOC = P | IOSTANDARD = LVTTL;
+NET "io_sel<15>" LOC = P | IOSTANDARD = LVTTL;
