@@ -2,26 +2,57 @@ module randomGate (
     input clk,
     input rst,  // reset
     output alufn[6],
-    output inv
+    output inv,
+    output led[3]
     
   ) {
   pn_gen randomnizer(.clk(clk),.rst(rst));
-  
+  dff outt[3](#INIT(001),.clk(clk));
+ 
+  dff seed(#INIT(0) , .clk(clk));
+
   always {
-    randomnizer.next = 1;
-    randomnizer.seed = 128b0;
+  
+    randomnizer.seed = seed.q;
+      randomnizer.next = 1;
+    seed.d = seed.q+1;
     
-    case(randomnizer.num[16:14]){
-      0: alufn = 011000;  //and
-      1: alufn = 011110;  //or
-      2: alufn = 010110;  //xor
-      3: alufn = 011010;  //A
-      4: alufn = 010111;  //nand
-      5: alufn = 010001;  //nor
-      6: alufn = 011001;  //xnor
-      7: alufn = 011100;  //B
-      default: alufn = 0;
+    case(randomnizer.num[2:0]){
+      0: alufn = 011110;//011000;
+         
+         outt.d = 001;
+     //    led = d1;  //and
+      1: alufn = 011110;
+       outt.d = 001;
+    //  led = d1;  //or
+      2: alufn = 010110;
+      outt.d = 010;
+    //  led = d2;  //xor
+      3: alufn = 011010;
+      outt.d = 011;
+   //   led = d3;  //A
+      4: alufn = 010111; 
+    //  led = d4; //nand
+        outt.d = 100;
+      5: alufn = 010001; 
+      outt.d = 101;
+    //  led = d5; //nor
+      6: alufn = 011001; 
+      outt.d = 110;
+    ///  led = d6; //xnor
+      7: alufn = 011110;//011100;
+      outt.d = 001;
+     // led = d1;  //B
+      default: 
+        alufn = 0;
+        //led = 4;
+        outt.d = 100;
+      
+       
     }
+    led = 110;
+    
+    //led = d5;
     if(randomnizer.num[20] == 1){
       inv = 1;
     }else{

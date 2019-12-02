@@ -5,7 +5,13 @@ module validation (
     input inv1,
     input inv2,
     input inv3,
-    output out[16]
+    output out[16],
+    output alufn11[6],
+        output alufn22[6],
+        output alufn33[6],
+    output inv11,
+    output inv22,
+    output inv33
   ) {
   
   alu alu1;
@@ -23,21 +29,28 @@ module validation (
     alu3.alufn = alufn3;
     
     if(inv1 == 1){
-      alu3.a = ~alu1.alu;
+      alu3.a = ~alu1.alu[0];
     }else{
-      alu3.a = alu1.alu;
+      alu3.a = alu1.alu[0];
     }
     
     if(inv2 == 1){
-      alu3.b = ~alu2.alu;
+      alu3.b = ~alu2.alu[0];
     }else{
-      alu3.b = alu2.alu;
+      alu3.b = alu2.alu[0];
     }
     
     if(inv3 == 1){
-      out = ~alu3.alu;
+      out = ~alu3.alu[0];
     }else{
-      out = alu3.alu;
+      out = alu3.alu[0];
     }
+    alufn11  = alufn1;
+    alufn22 = alufn2;
+    alufn33 = alufn3;
+    inv11 =inv1;
+    inv22  =inv2;
+    inv33 = inv3;
+    
   }
 }

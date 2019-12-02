@@ -15,10 +15,10 @@
     <src>arithmetic.luc</src>
     <src>randomGate.luc</src>
     <ucf lib="true">io_shield.ucf</ucf>
-    <ucf lib="true">mojo.ucf</ucf>
     <ucf>custom.ucf</ucf>
-    <component>decoder.luc</component>
+    <ucf lib="true">mojo.ucf</ucf>
     <component>pn_gen.luc</component>
+    <component>decoder.luc</component>
     <component>reset_conditioner.luc</component>
     <component>counter.luc</component>
   </files>

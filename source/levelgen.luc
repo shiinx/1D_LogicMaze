@@ -6,7 +6,10 @@ module levelgen (
     output alufn3[6],
     output inv1,
     output inv2,
-    output inv3
+    output inv3,
+    output led1[3],
+    output led2[3],
+    output led3[3]
   ) {
 
   randomGate rg1(.clk(clk),.rst(rst));
@@ -17,9 +20,12 @@ module levelgen (
   always {
     alufn1 = rg1.alufn;
     inv1 = rg1.inv;
+    led1 = rg1.led;
     alufn2 = rg2.alufn;
     inv2 = rg2.inv;
+    led2 = rg2.led;
     alufn3 = rg3.alufn;
     inv3 = rg3.inv;
+    led3 = rg3.led;
   }
 }
