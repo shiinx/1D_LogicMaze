@@ -5,14 +5,17 @@
     <src>boolean.luc</src>
     <src>multi_seven_seg.luc</src>
     <src>compare.luc</src>
+    <src>RG2.luc</src>
     <src top="true">mojo_top.luc</src>
     <src>fsm_main.luc</src>
     <src>levelgen.luc</src>
     <src>validation.luc</src>
     <src>shifter.luc</src>
+    <src>hardRandom.luc</src>
     <src>play.luc</src>
     <src>seven_seg.luc</src>
     <src>arithmetic.luc</src>
+    <src>RG3.luc</src>
     <src>randomGate.luc</src>
     <ucf lib="true">io_shield.ucf</ucf>
     <ucf>custom.ucf</ucf>

@@ -1,11 +1,11 @@
-module randomGate (
+module rG2 (
     input clk,
     input rst,  // reset
     input seed[32],
    
     output alufn[6],
     output inv,
-    
+   
     output led[3]
     
   ) {
@@ -20,7 +20,7 @@ module randomGate (
       randomnizer.next = 1;
     
     
-    case(randomnizer.num[16:14]){
+    case(randomnizer.num[2:0]){
       000: alufn = 011110;//011000;
          
          outt.d = 001;

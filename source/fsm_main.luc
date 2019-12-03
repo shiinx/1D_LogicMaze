@@ -12,7 +12,8 @@ module fsm_main (
     output led3[3],
     output inv11,
     output inv22,
-    output inv33
+    output inv33,
+    output debugcheck[3]
 
     
   ) {
@@ -35,7 +36,31 @@ module fsm_main (
 
   always {
     
-   
+        out = outt.q;
+  led1 = led11.q;
+    led2 = led22.q;
+    led3 = led33.q;
+    inv11 = inv1.q;
+    inv22 = inv2.q;
+    inv33 = inv3.q;//inv3.q;
+    debugcheck =b100;    
+    //STOP USING THE LG IF YOU WANT TO INCREMENT BY 1 only
+    validate.alufn1 = 0;//lg.alufn1;
+        validate.alufn2 = 0;//lg.alufn2;
+        validate.alufn3 = 0;//lg.alufn3;
+        validate.inv1 = 0;//lg.inv1;                
+        validate.inv2 = 0;//lg.inv2;
+        validate.inv3 = 0;//lg.inv3;
+       play.a = a;
+        play.b = b;
+        play.c = c;
+        play.d = d;
+        play.alufn1 = lg.alufn1;
+        play.alufn2 = lg.alufn2;
+        play.alufn3 = lg.alufn3;
+        play.inv1 = lg.inv1;
+        play.inv2 = lg.inv2;
+        play.inv3 = lg.inv3;
      //   led11.d = lg.led1;
        // led22.d = lg.led2;
      //   led33.d = lg.led3;
@@ -46,33 +71,37 @@ module fsm_main (
       
       state.GENERATELVL:
         validate.alufn1 = lg.alufn1;
-        
+        if(outt.q ==1){
+        outt.d= 0;
+        out = 0;
+        }
         validate.alufn2 = lg.alufn2;
         validate.alufn3 = lg.alufn3;
         validate.inv1 = lg.inv1;                
         validate.inv2 = lg.inv2;
         validate.inv3 = lg.inv3;
 
-        alufn1.d = validate.alufn11;
-        alufn2.d = validate.alufn22;
-        alufn3.d = validate.alufn33;
-        inv1.d = validate.inv11;
-        inv2.d = validate.inv22;
-        inv3.d = validate.inv33;
+        alufn1.d = lg.alufn1;
+        alufn2.d = lg.alufn2;
+        alufn3.d = lg.alufn3;
+        inv1.d = lg.inv1;
+        inv2.d = lg.inv2;
+        inv3.d = lg.inv3;
           led11.d = lg.led1;
         led22.d = lg.led2;
         led33.d = lg.led3;
-        
+        debugcheck = b000;
         if(validate.out == 0){
           state.d = state.STANDBY;
         }else{
           state.d = state.GENERATELVL;
         }
       state.STANDBY:
+       debugcheck = b001;
         if(btn_ready == 1){
           state.d = state.PLAY;
         }else{
-          state.d = state.STANDBY;
+          state.d = state.PLAY;
         }
       state.PLAY:
         play.a = a;
@@ -82,43 +111,25 @@ module fsm_main (
         play.alufn1 = alufn1.q;
         play.alufn2 = alufn2.q;
         play.alufn3 = alufn3.q;
-        play.inv1 = inv1.q;
-        play.inv2 = inv2.q;
-        play.inv3 = inv3.q;
+        play.inv1 = 0;//inv1.q;
+        play.inv2 = 0;//inv2.q;
+        play.inv3 = 0;//inv3.q;
         outt.d = play.out;
+        debugcheck  =b010;
         
-        if(play.out == 0){
+        if(outt.q == 0){
           state.d = state.PLAY;
         }else{
-          state.d = state.CORRECT;
+          state.d = state.GENERATELVL;
         }
       state.CORRECT:
+      debugcheck=b011;
           outt.d = 1;
-          out = 1;
+        
+          out = outt.q;
+          state.d = state.CORRECT;
         
     }
-       out = outt.q;
-  led1 = led11.q;
-    led2 = led22.q;
-    led3 = led33.q;
-    inv11 = inv1.q;
-    inv22 = inv2.q;
-    inv33 = inv3.q;//inv3.q;
-    validate.alufn1 = lg.alufn1;
-        validate.alufn2 = lg.alufn2;
-        validate.alufn3 = lg.alufn3;
-        validate.inv1 = lg.inv1;                
-        validate.inv2 = lg.inv2;
-        validate.inv3 = lg.inv3;
-       play.a = 0;
-        play.b = 0;
-        play.c = 0;
-        play.d = 0;
-        play.alufn1 = lg.alufn1;
-        play.alufn2 = lg.alufn2;
-        play.alufn3 = lg.alufn3;
-        play.inv1 = lg.inv1;
-        play.inv2 = lg.inv2;
-        play.inv3 = lg.inv3;
+  
   }
 }
