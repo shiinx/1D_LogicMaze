@@ -5,19 +5,24 @@ module fsm_main (
     input b,
     input c,
     input d,
+    input flag,
     input rst,  // reset
     output out,
+    input threesig[3],
     output led1[3],
     output led2[3],
     output led3[3],
     output inv11,
     output inv22,
     output inv33,
+    output delay,
     output debugcheck[3]
+ 
+    
 
     
   ) {
-  
+  //timer t(.clk(clk) , .rst(rst));
   dff alufn1[6](.clk(clk));
   dff alufn2[6](.clk(clk));
   dff alufn3[6](.clk(clk));
@@ -28,14 +33,24 @@ module fsm_main (
   dff led22[3](.clk(clk));
   dff led33[3](.clk(clk));
   dff outt(.clk(clk));
+  dff index[7]( .clk(clk) , .rst(rst));
+  dff score[5](.clk(clk) , .rst(rst));
   levelgen lg(.clk(clk), .rst(rst));
-
+  
   fsm state( #INIT(GENERATELVL),.clk(clk), .rst(rst)) = {GENERATELVL, STANDBY, PLAY, CORRECT, GAMEOVER};
     validation validate;
   play play(.clk(clk), .rst(rst));
 
   always {
-    
+  
+  //  if(add ==1){
+    //lolclock.d= lolclock.q + 10;
+      
+     // }
+  lg.select = index.q;
+    lg.inv11 = threesig[0];
+    lg.inv22 = threesig[1];
+    lg.inv33 = threesig[2];
         out = outt.q;
   led1 = led11.q;
     led2 = led22.q;
@@ -61,6 +76,11 @@ module fsm_main (
         play.inv1 = lg.inv1;
         play.inv2 = lg.inv2;
         play.inv3 = lg.inv3;
+        delay = 0;
+  //  t.add = 0;
+  //  if(t.out == b00001111){
+ //   state.d = state.GAMEOVER;
+ //     }
      //   led11.d = lg.led1;
        // led22.d = lg.led2;
      //   led33.d = lg.led3;
@@ -70,11 +90,17 @@ module fsm_main (
     case(state.q){
       
       state.GENERATELVL:
+          
+         index.d= index.q+1;
+        lg.select = index.q;
         validate.alufn1 = lg.alufn1;
         if(outt.q ==1){
         outt.d= 0;
         out = 0;
         }
+          lg.inv11 = threesig[0];
+    lg.inv22 = threesig[1];
+    lg.inv33 = threesig[2];
         validate.alufn2 = lg.alufn2;
         validate.alufn3 = lg.alufn3;
         validate.inv1 = lg.inv1;                
@@ -91,19 +117,28 @@ module fsm_main (
         led22.d = lg.led2;
         led33.d = lg.led3;
         debugcheck = b000;
+       delay = 0;
         if(validate.out == 0){
           state.d = state.STANDBY;
         }else{
           state.d = state.GENERATELVL;
         }
+         if(flag ==0){
+        state.d = state.GAMEOVER;
+          }
       state.STANDBY:
        debugcheck = b001;
+        delay = 0;
         if(btn_ready == 1){
           state.d = state.PLAY;
         }else{
-          state.d = state.PLAY;
+          state.d = state.STANDBY;
         }
+         if(flag ==0){
+        state.d = state.GAMEOVER;
+          }
       state.PLAY:
+        
         play.a = a;
         play.b = b;
         play.c = c;
@@ -120,14 +155,29 @@ module fsm_main (
         if(outt.q == 0){
           state.d = state.PLAY;
         }else{
-          state.d = state.GENERATELVL;
-        }
-      state.CORRECT:
-      debugcheck=b011;
-          outt.d = 1;
-        
-          out = outt.q;
+       //s t.add = 1;
+          score.d = score.q +1;
+        index.d = index.q+1;
           state.d = state.CORRECT;
+          delay = 1;
+        }
+         if(flag ==0){
+        delay= 0;
+        state.d = state.GAMEOVER;
+          }
+        state.CORRECT:
+      debugcheck=b011;
+        delay = 1;
+          //outt.d = 1;
+         // index.d = index.q+1;
+         // out = outt.q;
+          
+          state.d = state.GENERATELVL;
+      state.GAMEOVER:
+      delay = 0;
+       debugcheck = b101;
+        state.d = state.GAMEOVER;
+        
         
     }
   
