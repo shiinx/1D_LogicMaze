@@ -17,9 +17,6 @@ module fsm_main (
     output inv33,
     output delay,
     output debugcheck[3]
- 
-    
-
     
   ) {
   //timer t(.clk(clk) , .rst(rst));
@@ -47,12 +44,12 @@ module fsm_main (
     //lolclock.d= lolclock.q + 10;
       
      // }
-  lg.select = index.q;
+    lg.select = index.q;
     lg.inv11 = threesig[0];
     lg.inv22 = threesig[1];
     lg.inv33 = threesig[2];
-        out = outt.q;
-  led1 = led11.q;
+    out = outt.q;
+    led1 = led11.q;
     led2 = led22.q;
     led3 = led33.q;
     inv11 = inv1.q;
