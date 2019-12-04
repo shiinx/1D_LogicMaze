@@ -12,12 +12,11 @@ dff innerclock[25](.clk(clk), .rst(rst));
   always {
     innerclock.d = innerclock.q+1;
     if (innerclock.q == b1111111111111111111111111){
-    lolclock.d = lolclock.q+1;
-      }
+      lolclock.d = lolclock.q+1;
+    }
     if(add ==1){
-    lolclock.d= lolclock.q + 10;
-      
-      }
+      lolclock.d= lolclock.q + 10;
+    }
     out = lolclock.q;
   }
 }

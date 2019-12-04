@@ -6,6 +6,7 @@ module multi_dec_ctr #(
     input inc,                // increment counter
     output digits[DIGITS][5]  // digit values
   ) {
+  //timer /counter 
  
   .clk(clk), .rst(rst) {
     decimal_counter dctr [DIGITS]; // digit counters

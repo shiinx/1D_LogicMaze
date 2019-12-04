@@ -66,66 +66,96 @@ module mojo_top (
     avr_rx = bz;            // not using serial port
     main.flag = flag.q;
     dec_ctr.inc = 0;
-     innerclock.d = innerclock.q+1;
-    if (innerclock.q == b1111111111111111111111111){
-      lolclock.d = lolclock.q+1;
-      dec_ctr.inc = d10 - lolclock.q;
-      innerclock.d = b0000000000000000000000000;
+    innerclock.d = innerclock.q+1;
+    if (main.debugcheck == d2 && innerclock.q == b1111111111111111111111111){
+      lolclock.d = lolclock.q+1; //increment the functional clock by 1 everytime 2^25 bits of innerclock is incremented.
+      dec_ctr.inc = d10 -lolclock.q;
+      innerclock.d = b0000000000000000000000000; // reset to 0 if exceeds max lenght
     }
-    if(main.delay ==1){
+    if(main.delay ==1){//this delay variable is 1 during a state of success, ie when a level is solved. this means that the countdown resets.
       lolclock.d =b00000000;
     }
-    main.threesig = innerclock.q[4:2];
-    if(lolclock.q > b00001010 ){
-      flag.d = 0;
+    main.threesig = innerclock.q[4:2];//singals for inverters.
+    if(lolclock.q >= d10){ //game over if time exceeds.
+      flag.d = 0; 
       lolclock.d = 8b0;
     }
-    if(readyread == 1 && aread == 0 && bread == 0 && cread == 0 && dread == 0){
-      main.btn_ready = 1;
+    if(readyread == 1 && aread == 0 && bread == 0 && cread == 0 && dread == 0){ //game state is standby if ready button is off,or if any toggle switches havent been reseted .
+      main.btn_ready = 1;//this variable allows state change to play.
     }
     else{
       main.btn_ready = 0;
     }
     
-    
+    main.threesig = b000;
     main.a = aread;
     main.b = bread;
     main.c = cread;
     main.d = dread;
-    gate1.select = 0;
-    gate2.select = 0;
-    gate3.select = 0;
-    case(main.led1){
-      000: gate1.select = 0;
-      010: gate1.select = 2;
-      100: gate1.select = 4;
-      110: gate1.select = 6;
+    case(main.led1){//displaying gates on 7 segment.
+      b011000: gate1.select = d0;
+      b010111: gate1.select = d1;
+      b010001: gate1.select = d3;
+      b011110: gate1.select = d2;
+      b010110: gate1.select = d4;
+      b011001: gate1.select = d5;
+      b011100: gate1.select = d7;
+      b011010: gate1.select = d6;
+      default: gate1.select = d8;
     }
     
+    // and   {5d10,5d13,5d12,5d17} [0] 011000
+    // nand  {5d13,5d10,5d13,5d12} [1] 010111
+    // or    {5d14,5d15,5d17,5d17} [2] 011110
+    // nor   {5d13,5d14,5d15,5d17} [3] 010001
+    // xor   {5d16,5d14,5d15,5d17} [4] 010110
+    // xnor  {5d16,5d13,5d14,5d15} [5] 011001
+    // a     {5d10,5d17,5d17,5d17} [6] 011010
+    // b     {5d11,5d17,5d17,5d17} [7] 011100
+    
     case(main.led2){
-      000: gate2.select = 0;
-      010: gate2.select = 2;
-      100: gate2.select = 4;
-      110: gate2.select = 6;
+       b011000: gate2.select = d0;
+      b010111: gate2.select = d1;
+      b010001: gate2.select = d3;
+      b011110: gate2.select = d2;
+      b010110: gate2.select = d4;
+      b011001: gate2.select = d5;
+      b011100: gate2.select = d7;
+      b011010: gate2.select = d6;
+      default: gate2.select = d8;
     }
     
     case(main.led3){
-      000: gate3.select = 0;
-      010: gate3.select = 2;
-      100: gate3.select = 4;
-      110: gate3.select = 6;
+      b011000: gate3.select = d0;
+      b010111: gate3.select = d1;
+      b010001: gate3.select = d3;
+      b011110: gate3.select = d2;
+      b010110: gate3.select = d4;
+      b011001: gate3.select = d5;
+      b011100: gate3.select = d7;
+      b011010: gate3.select = d6;
+      default: gate3.select = d8;
     }
     
-//    mseg.values = c{gate1.out,gate2.out,gate3.out,dec_ctr.digits};
+    led = main.debugcheck;
     
-    mseg.values = c{dec_ctr.digits,gate3.out,gate2.out,gate1.out};    
+    //mseg.values = c{gate1.out,gate2.out,gate3.out,dec_ctr.digits};
+    /*case(main.debugcheck){
+      b000: gate4.select = d0;
+      b001: gate4.select = d1;
+      b010: gate4.select = d2;
+      b011: gate4.select = d3;
+      b100: gate4.select = d4;
+      default: gate4.select = d7;
+    }*/
+    mseg.values = c{dec_ctr.digits,gate3.out,gate2.out,gate1.out};     //7 segment
     seg = ~mseg.seg;
     sel = mseg.sel;
     
-    inv1 = main.inv11;
+    inv1 = main.inv11; //inverter bits
     inv2 = main.inv22;
     inv3 = main.inv33;
-    out = main.out;
+    out = main.out; //big red led.
     
     
   }

@@ -1,3 +1,6 @@
+/*
+this handles our three logic gates and returns their output
+*/
 module play (
     input clk,  // clock
     input rst,  // reset
@@ -13,17 +16,17 @@ module play (
     input inv3,
     output out
   ) {
-  alu aluMOD1;
+  alu aluMOD1; //three alufns
   sig out1;
   sig out2;
   alu aluMOD2;
   alu aluMOD3;
 
   always {
-      aluMOD1.alufn = alufn1;
+      aluMOD1.alufn = alufn1; //assigning the function and io
       aluMOD1.a = a;
       aluMOD1.b = b;
-      if(inv1 == 1){
+      if(inv1 == 1){ //inverting bits
         out1 = ~aluMOD1.alu[0];  
       }else{
         out1 = aluMOD1.alu[0];  
