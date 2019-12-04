@@ -10,53 +10,152 @@ module mojo_top (
     output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
     input avr_tx,           // AVR TX (FPGA RX)
     output avr_rx,          // AVR RX (FPGA TX)
-    input avr_rx_busy,      // AVR RX buffer full
-    output io_led [3][8],   // LEDs on IO Shield
-    output io_seg [8],      // 7-segment LEDs on IO Shield
-    output io_sel [16],      // Digit select on IO Shield
-    input io_button [5],    // 5 buttons on IO Shield
-    input io_dip [3][8]     // DIP switches on IO Shield
+    input avr_rx_busy,       // AVR RX buffer full
+    output sel[16],
+    output seg[8],
+    input readyread,
+    output readyhigh,
+    input aread,
+    output ahigh,
+    input bread,
+    output bhigh,
+    input cread,
+    output chigh,
+    input dread,
+    output dhigh,
+    output inv1,
+    output inv2,
+    output inv3,
+    output out    
+    
   ) {
-  sig rst;                  // reset signal
-
+  sig rst; // reset signal
+                
    .clk(clk) {
   
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
     .rst(rst){
+      multi_seven_seg mseg;
       fsm_main main;
+      multi_dec_ctr dec_ctr;
+      dff innerclock[25];
+      dff lolclock[8];
+      dff flag(#INIT(1));
     }
-     
   }
-
+  
+  gate_rom gate1;
+  gate_rom gate2;
+  gate_rom gate3;
+  
   
   always {
+    ahigh = 1;
+    bhigh = 1;
+    chigh = 1;
+    dhigh = 1;
+    readyhigh = 1;
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
-    main.btn_ready = 1;
+    
     led = 8h00;             // turn LEDs off
     spi_miso = bz;          // not using SPI
     spi_channel = bzzzz;    // not using flags
     avr_rx = bz;            // not using serial port
+    main.flag = flag.q;
+    dec_ctr.inc = 0;
+    innerclock.d = innerclock.q+1;
+    if (main.debugcheck == d2 && innerclock.q == b1111111111111111111111111){
+      lolclock.d = lolclock.q+1; //increment the functional clock by 1 everytime 2^25 bits of innerclock is incremented.
+      dec_ctr.inc = d10 -lolclock.q;
+      innerclock.d = b0000000000000000000000000; // reset to 0 if exceeds max lenght
+    }
+    if(main.delay ==1){//this delay variable is 1 during a state of success, ie when a level is solved. this means that the countdown resets.
+      lolclock.d =b00000000;
+    }
+    main.threesig = innerclock.q[4:2];//singals for inverters.
+    if(lolclock.q >= d10){ //game over if time exceeds.
+      flag.d = 0; 
+      lolclock.d = 8b0;
+    }
+    if(readyread == 1 && aread == 0 && bread == 0 && cread == 0 && dread == 0){ //game state is standby if ready button is off,or if any toggle switches havent been reseted .
+      main.btn_ready = 1;//this variable allows state change to play.
+    }
+    else{
+      main.btn_ready = 0;
+    }
     
-    io_led = 3x{{8h00}};    // turn LEDs off
-    io_seg = 8hff;          // turn segments off
-    io_sel = 4hf;  
-       
-    io_led[0][main.led1] = 1;
-    io_led[1][main.led2] = 1;
-    io_led[2][main.led3] = 1; 
-    io_led[0][7] = main.inv11;
-    io_led[1][7] = main.inv22;
-    io_led[2][7] = main.inv33;         // select no digits
-    main.a = io_dip[1][0];
-    main.b = io_dip[1][1];
-    main.c = io_dip[1][2];
-    main.d = io_dip[1][3]; 
-
+    main.threesig = b000;
+    main.a = aread;
+    main.b = bread;
+    main.c = cread;
+    main.d = dread;
+    case(main.led1){//displaying gates on 7 segment.
+      b011000: gate1.select = d0;
+      b010111: gate1.select = d1;
+      b010001: gate1.select = d3;
+      b011110: gate1.select = d2;
+      b010110: gate1.select = d4;
+      b011001: gate1.select = d5;
+      b011100: gate1.select = d7;
+      b011010: gate1.select = d6;
+      default: gate1.select = d8;
+    }
     
-    io_led[0][0] = main.out;
+    // and   {5d10,5d13,5d12,5d17} [0] 011000
+    // nand  {5d13,5d10,5d13,5d12} [1] 010111
+    // or    {5d14,5d15,5d17,5d17} [2] 011110
+    // nor   {5d13,5d14,5d15,5d17} [3] 010001
+    // xor   {5d16,5d14,5d15,5d17} [4] 010110
+    // xnor  {5d16,5d13,5d14,5d15} [5] 011001
+    // a     {5d10,5d17,5d17,5d17} [6] 011010
+    // b     {5d11,5d17,5d17,5d17} [7] 011100
+    
+    case(main.led2){
+       b011000: gate2.select = d0;
+      b010111: gate2.select = d1;
+      b010001: gate2.select = d3;
+      b011110: gate2.select = d2;
+      b010110: gate2.select = d4;
+      b011001: gate2.select = d5;
+      b011100: gate2.select = d7;
+      b011010: gate2.select = d6;
+      default: gate2.select = d8;
+    }
+    
+    case(main.led3){
+      b011000: gate3.select = d0;
+      b010111: gate3.select = d1;
+      b010001: gate3.select = d3;
+      b011110: gate3.select = d2;
+      b010110: gate3.select = d4;
+      b011001: gate3.select = d5;
+      b011100: gate3.select = d7;
+      b011010: gate3.select = d6;
+      default: gate3.select = d8;
+    }
+    
+    led = main.debugcheck;
+    
+    //mseg.values = c{gate1.out,gate2.out,gate3.out,dec_ctr.digits};
+    /*case(main.debugcheck){
+      b000: gate4.select = d0;
+      b001: gate4.select = d1;
+      b010: gate4.select = d2;
+      b011: gate4.select = d3;
+      b100: gate4.select = d4;
+      default: gate4.select = d7;
+    }*/
+    mseg.values = c{dec_ctr.digits,gate3.out,gate2.out,gate1.out};     //7 segment
+    seg = ~mseg.seg;
+    sel = mseg.sel;
+    
+    inv1 = main.inv11; //inverter bits
+    inv2 = main.inv22;
+    inv3 = main.inv33;
+    out = main.out; //big red led.
     
     
   }

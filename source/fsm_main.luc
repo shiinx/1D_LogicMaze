@@ -5,120 +5,166 @@ module fsm_main (
     input b,
     input c,
     input d,
+    input flag,
     input rst,  // reset
     output out,
-    output led1[3],
-    output led2[3],
-    output led3[3],
+    input threesig[3],
+    output led1[6],
+    output led2[6],
+    output led3[6],
     output inv11,
     output inv22,
-    output inv33
-
+    output inv33,
+    output delay,
+    output debugcheck[3]
     
   ) {
-  
-  dff alufn1[6](.clk(clk));
+
+  dff alufn1[6](.clk(clk)); //dffs to store the alufns of our level
   dff alufn2[6](.clk(clk));
   dff alufn3[6](.clk(clk));
-  dff inv1(.clk(clk)) ;
+  dff inv1(.clk(clk)) ; //for inverter presence
   dff inv2(.clk(clk));
   dff inv3(.clk(clk));
-  dff led11[3](.clk(clk));
-  dff led22[3](.clk(clk));
-  dff led33[3](.clk(clk));
-  dff outt(.clk(clk));
+//  dff led11[3](.clk(clk)); //corresponds to the index of the led  / 7 seg
+//  dff led22[3](.clk(clk));
+//  dff led33[3](.clk(clk));
+  dff index[7](.clk(clk) , .rst(rst)); //random select level.
+  dff score[5](.clk(clk) , .rst(rst));  //score variable for future implementation
   levelgen lg(.clk(clk), .rst(rst));
-
+  
   fsm state( #INIT(GENERATELVL),.clk(clk), .rst(rst)) = {GENERATELVL, STANDBY, PLAY, CORRECT, GAMEOVER};
-    validation validate;
+  validation validate;
   play play(.clk(clk), .rst(rst));
 
   always {
-    
-   
-     //   led11.d = lg.led1;
-       // led22.d = lg.led2;
-     //   led33.d = lg.led3;
-     ////   inv1.d = lg.inv1;
-     //   inv2.d = lg.inv2;
-     //   inv3.d = lg.inv3;
+    lg.select = index.q; //the bllow are assignments that perform default assigns
+    out = 0;
+    led1 = 0;
+    led2 = 0;
+    led3 = 0;
+    inv11 = 0;
+    inv22 = 0;
+    inv33 = 0;
+    debugcheck =b100;    
+    validate.alufn1 = 0;
+    validate.alufn2 = 0;
+    validate.alufn3 = 0;
+    validate.inv1 = 0;
+    validate.inv2 = 0;
+    validate.inv3 = 0;
+    play.a = 0;
+    play.b = 0;
+    play.c = 0;
+    play.d = 0;
+    play.alufn1 = 0;
+    play.alufn2 = 0;
+    play.alufn3 = 0;
+    play.inv1 = 0;
+    play.inv2 = 0;
+    play.inv3 = 0;
+    delay = 0;
     case(state.q){
+    //into our fsm, always starts are generate level
       
-      state.GENERATELVL:
+      state.GENERATELVL:  
+        index.d= index.q+1;
+        lg.select = index.q;
         validate.alufn1 = lg.alufn1;
-        
         validate.alufn2 = lg.alufn2;
         validate.alufn3 = lg.alufn3;
-        validate.inv1 = lg.inv1;                
-        validate.inv2 = lg.inv2;
-        validate.inv3 = lg.inv3;
+        validate.inv1 = threesig[0];                
+        validate.inv2 = threesig[1];
+        validate.inv3 = threesig[2];
 
-        alufn1.d = validate.alufn11;
-        alufn2.d = validate.alufn22;
-        alufn3.d = validate.alufn33;
-        inv1.d = validate.inv11;
-        inv2.d = validate.inv22;
-        inv3.d = validate.inv33;
-          led11.d = lg.led1;
-        led22.d = lg.led2;
-        led33.d = lg.led3;
-        
-        if(validate.out == 0){
+        alufn1.d = lg.alufn1;
+        alufn2.d = lg.alufn2;
+        alufn3.d = lg.alufn3;        
+        inv1.d = threesig[0];
+        inv2.d = threesig[1];
+        inv3.d = threesig[2];                
+        debugcheck = b000;
+        delay = 0;
+        if(validate.out == 0){ //checking if level is valid, else reinit
           state.d = state.STANDBY;
         }else{
           state.d = state.GENERATELVL;
         }
+        if(flag ==0){// flag is 0 only if timer in mojotop becomes0
+          state.d = state.GAMEOVER;
+        }
+        
       state.STANDBY:
-        if(btn_ready == 1){
+        debugcheck = b001;
+        delay = 0;
+        if(btn_ready == 1){// if ready button is pressed and toggle switches are 0
           state.d = state.PLAY;
         }else{
           state.d = state.STANDBY;
         }
+        if(flag ==0){
+          state.d = state.GAMEOVER;
+        }
+        
       state.PLAY:
-        play.a = a;
+        led1 = alufn1.q;
+        led2 = alufn2.q;
+        led3 = alufn3.q;
+        play.a = a; //inputs for our two gates
         play.b = b;
         play.c = c;
         play.d = d;
-        play.alufn1 = alufn1.q;
+        play.alufn1 = alufn1.q;//logic operations of our three gates
         play.alufn2 = alufn2.q;
         play.alufn3 = alufn3.q;
         play.inv1 = inv1.q;
         play.inv2 = inv2.q;
         play.inv3 = inv3.q;
-        outt.d = play.out;
-        
+        inv11 = inv1.q;
+        inv22 = inv2.q;
+        inv33 = inv3.q;
+        out = play.out; //output of last gate that takes output as first two gates as input
+        debugcheck  =b010;
         if(play.out == 0){
           state.d = state.PLAY;
         }else{
+          score.d = score.q+1;//increment score
+          index.d = index.q+1;//increment level 
+          state.d = state.CORRECT;
+          delay = 1; //resets timer
+        }
+        if(flag ==0){
+          delay= 0;
+          state.d = state.GAMEOVER;
+        }
+        
+      state.CORRECT:
+        debugcheck=b011;
+        out = 1;
+        delay = 1; //delay =1 implies resetting time.
+        if(btn_ready == 1){
+          state.d = state.GENERATELVL;
+        }else{
           state.d = state.CORRECT;
         }
-      state.CORRECT:
-          outt.d = 1;
-          out = 1;
         
+      state.GAMEOVER:
+        alufn1.d = 0;
+        alufn2.d = 0;
+        alufn3.d = 0;
+        inv1.d = 0;
+        inv2.d = 0;
+        inv3.d = 0; 
+        delay = 0;
+        debugcheck = b100;
+        state.d = state.GAMEOVER;
+        if(btn_ready == 1){
+          score.d = 0;
+          state.d = state.GENERATELVL;
+        }else{
+          state.d = state.GAMEOVER;
+        }
     }
-       out = outt.q;
-  led1 = led11.q;
-    led2 = led22.q;
-    led3 = led33.q;
-    inv11 = inv1.q;
-    inv22 = inv2.q;
-    inv33 = inv3.q;//inv3.q;
-    validate.alufn1 = lg.alufn1;
-        validate.alufn2 = lg.alufn2;
-        validate.alufn3 = lg.alufn3;
-        validate.inv1 = lg.inv1;                
-        validate.inv2 = lg.inv2;
-        validate.inv3 = lg.inv3;
-       play.a = 0;
-        play.b = 0;
-        play.c = 0;
-        play.d = 0;
-        play.alufn1 = lg.alufn1;
-        play.alufn2 = lg.alufn2;
-        play.alufn3 = lg.alufn3;
-        play.inv1 = lg.inv1;
-        play.inv2 = lg.inv2;
-        play.inv3 = lg.inv3;
+  
   }
 }

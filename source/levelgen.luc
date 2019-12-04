@@ -4,28 +4,16 @@ module levelgen (
     output alufn1[6],
     output alufn2[6],
     output alufn3[6],
-    output inv1,
-    output inv2,
-    output inv3,
-    output led1[3],
-    output led2[3],
-    output led3[3]
+    input select[7]
   ) {
-
-  randomGate rg1(.clk(clk),.rst(rst));
-  randomGate rg2(.clk(clk),.rst(rst));
-  randomGate rg3(.clk(clk),.rst(rst));
-
+  sig alufns[3][6] ;
+  hardRandom hr (.clk(clk), .rst(rst));
   
-  always {
-    alufn1 = rg1.alufn;
-    inv1 = rg1.inv;
-    led1 = rg1.led;
-    alufn2 = rg2.alufn;
-    inv2 = rg2.inv;
-    led2 = rg2.led;
-    alufn3 = rg3.alufn;
-    inv3 = rg3.inv;
-    led3 = rg3.led;
+  always {    
+    hr.select = select;//gives level and inits the different gates 
+    alufns = hr.out;
+    alufn1 = alufns[0];
+    alufn2 = alufns[1];
+    alufn3= alufns[2];
   }
 }

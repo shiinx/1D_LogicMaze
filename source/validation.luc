@@ -1,3 +1,9 @@
+/*
+This module is to verify if a combination of logic gates (our level) outputs to 1 with all inputs as 0. 
+This means that the level will automatically pass. To prevent this, we ensure that out[16] is 0 .
+
+*/
+
 module validation (
     input alufn1[6],
     input alufn2[6],
@@ -7,8 +13,8 @@ module validation (
     input inv3,
     output out[16],
     output alufn11[6],
-        output alufn22[6],
-        output alufn33[6],
+    output alufn22[6],
+    output alufn33[6],
     output inv11,
     output inv22,
     output inv33
@@ -28,7 +34,7 @@ module validation (
     alu2.alufn = alufn2;
     alu3.alufn = alufn3;
     
-    if(inv1 == 1){
+    if(inv1 == 1){ //code for the three inverters
       alu3.a = ~alu1.alu[0];
     }else{
       alu3.a = alu1.alu[0];
@@ -40,7 +46,7 @@ module validation (
       alu3.b = alu2.alu[0];
     }
     
-    if(inv3 == 1){
+    if(inv3 == 1){//output
       out = ~alu3.alu[0];
     }else{
       out = alu3.alu[0];
